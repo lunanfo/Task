@@ -13,7 +13,7 @@ http-request ^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] tag=EmbySearchModifier, 
 ^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] url script-request-header https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
 
 [mitm]
-hostname = *.your-emby-server.com
+#hostname = *.your-emby-server.com //在hostname中添加你的emby服务器地址
 */
 
 let url = $request.url;
