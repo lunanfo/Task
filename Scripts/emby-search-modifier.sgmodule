@@ -1,7 +1,7 @@
 #name=Emby Search Type Modifier
 #!desc=Emby Search Type Modifier
 
-[rewrite_local]
+[Script]
 EmbySearchModifier = type=http-request, pattern=^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!], script-path=https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
 
 [MITM]
