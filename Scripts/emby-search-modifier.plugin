@@ -1,0 +1,9 @@
+#name=Emby Search Type Modifier
+#!desc=Emby Search Type Modifier
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Infuse.png 
+
+[rewrite_local]
+http-request ^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] tag=EmbySearchModifier, script-path=https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
+
+[mitm]
+hostname = 
