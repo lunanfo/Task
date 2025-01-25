@@ -1,5 +1,5 @@
 #!name=Emby Search Type Modifier
-#!desc=Emby Search Type Modifier
+#!desc=Emby Search Type Modifier\n修改 Emby 搜索参数，支持不同类型的搜索：@ 电影，$ 剧集，# 播放列表，! 合集
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Infuse.png 
 
 [Script]
