@@ -4,13 +4,13 @@
 /*
 [rewrite_local]
 # Surge
-EmbySearchModifier = type=http-request, pattern=^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!], script-path=https://raw.githubusercontent.com/lunanfo/Task/master/emby-search-modifier.js
+EmbySearchModifier = type=http-request, pattern=^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!], script-path=https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
 
 # Loon
-http-request ^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] tag=EmbySearchModifier, script-path=https://raw.githubusercontent.com/lunanfo/Task/master/emby-search-modifier.js
+http-request ^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] tag=EmbySearchModifier, script-path=https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
 
 # Quantumult X
-^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] url script-request-header https://raw.githubusercontent.com/lunanfo/Task/master/emby-search-modifier.js
+^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!] url script-request-header https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
 
 [mitm]
 hostname = *.your-emby-server.com
