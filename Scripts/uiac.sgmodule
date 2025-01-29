@@ -1,0 +1,9 @@
+#!name=Unlock Infuse Adult Capture
+#!desc=unlock the infuse adult capture feature
+
+[Script]
+UnlockInfuseAdultCapture = type=http-request, pattern=^https:\/\/movie\-api\.infuse\.im\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?), script-path=https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/Scripts/uiac.js
+UnlockInfuseAdultCapture = type=http-request, pattern=^https:\/\/api\.themoviedb\.org\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?), script-path=https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/Scripts/uiac.js
+
+[MITM]
+hostname = %APPEND% movie-api.infuse.im, api.themoviedb.org
