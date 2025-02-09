@@ -1,0 +1,3 @@
+host, appstoreconnect.apple.com, proxy
+host, iosapps-ssl.itunes.apple.com, proxy
+host, itcmobile.itunes.apple.com, proxy

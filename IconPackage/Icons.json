@@ -1,0 +1,19 @@
+{
+    "name": "Icon Package",
+    "description": "icons by lunanfo",
+    "icons":[
+        {"name":"bing","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/bing.png"},
+        {"name":"chatgpt","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/chatgpt.png"},
+        {"name":"cloud","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/cloud.png"},
+        {"name":"data_science","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/data-science.png"},
+        {"name":"deepseek","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/deepseek.png"},
+        {"name":"duolingo","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/duolingo.png"},
+        {"name":"gemini","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/gemini.png"},
+        {"name":"information","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/information.png"},
+        {"name":"pc_tower","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/pc-tower.png"},
+        {"name":"singbox","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/singbox.png"},
+        {"name":"stt","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/stt.png"},
+        {"name":"tms","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/tms.png"},
+        {"name":"upload","url":"https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/icons/upload.png"}
+    ]
+}

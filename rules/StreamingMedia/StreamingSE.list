@@ -1,0 +1,16 @@
+host, api.biliapi.com, StreamingSE
+host, api.biliapi.net, StreamingSE
+host, api.bilibili.com, StreamingSE
+host, app.biliapi.com, StreamingSE
+host, app.biliapi.net, StreamingSE
+host, app.bilibili.com, StreamingSE
+host, grpc.biliapi.net, StreamingSE
+host, m.bilibili.com, StreamingSE
+host, upos-hz-mirrorakam.akamaized.net, StreamingSE
+host, www.bilibili.com, StreamingSE
+host-keyword, cn-hk-eq-bcache-, StreamingSE
+host, cache.video.iqiyi.com, StreamingSE
+ip-cidr, 116.211.202.206/32, StreamingSE
+ip-cidr, 116.211.202.216/32, StreamingSE
+host-suffix, api.mgtv.com, StreamingSE
+host, mobileso.bz.mgtv.com, StreamingSE
