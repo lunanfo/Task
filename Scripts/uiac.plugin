@@ -3,8 +3,8 @@
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Infuse.png 
 
 [Script]
-http-request ^https:\/\/movie\-api\.infuse\.im\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?) tag=Unlock Infuse Adult Capture, script-path=https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/Scripts/uiac.js
-http-request ^https:\/\/api\.themoviedb\.org\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?) tag=Unlock Infuse Adult Capture, script-path=https://raw.githubusercontent.com/lunanfo/Task/refs/heads/main/Scripts/uiac.js
+http-request ^https:\/\/movie\-api\.infuse\.im\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?) tag=Unlock Infuse Adult Capture, script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/uiac.js
+http-request ^https:\/\/api\.themoviedb\.org\/3\/(?:movie\/\d+\?|search\/movie\?|tv\/\d+\?|search\/tv\?) tag=Unlock Infuse Adult Capture, script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/uiac.js
 
 [MITM]
 hostname=movie-api.infuse.im,api.themoviedb.org
