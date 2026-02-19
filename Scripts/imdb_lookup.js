@@ -5,7 +5,7 @@
 
 // ================= [使用说明] =================
 // 1. 如果你在 Loon/Surge 的“参数(Argument)”输入框中填写，格式支持：
-//    - 快捷格式：最后生还者, 2023  (直接填 剧名, 年份 即可)
+//    - 快捷格式：最后生还者 @ 2023  (直接填 剧名 @ 年份 即可)
 //    - 标准格式：Title=最后生还者, Year=2023
 //
 // 2. 如果你在脚本内手动修改（不使用 UI 参数），请修改下方的 MANUAL_CONFIG：
@@ -74,10 +74,10 @@ const MANUAL_CONFIG = {
                         if (key) _argument[key.trim()] = val ? val.trim() : true;
                     });
                 } else if ($argument.trim().length > 0) {
-                    // 模式 B：纯字符串格式 "剧名, 年份"
-                    let parts = $argument.split(/[&,]/);
-                    _argument.Title = parts[0] ? parts[0].trim() : "";
-                    _argument.Year = parts[1] ? parts[1].trim() : "";
+                    // 模式 B：纯字符串格式 "剧名 @ 年份"
+                    let [title, year] = $argument.split('@').map(s => s.trim());
+                    _argument.Title = title || "";
+                    _argument.Year = year || "";
                 }
                 fromArg = !!(_argument.Title);
             } else if (typeof $argument === 'object' && Object.keys($argument).length > 0) {
