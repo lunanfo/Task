@@ -1,0 +1,9 @@
+# Intro Fix for Quantumult X
+# API responses modification for better compatibility.
+
+[rewrite_local]
+^https?:\/\/api\.introdb\.app\/segments url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js
+^https?:\/\/api\.theintrodb\.org\/v2\/media url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js
+
+[mitm]
+hostname = api.introdb.app, api.theintrodb.org

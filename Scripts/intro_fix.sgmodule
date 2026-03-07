@@ -1,0 +1,10 @@
+#!name=Intro Fix
+#!desc=Intro 增强脚本：触发 IntroDB 降级 TIDB，并修复 TIDB 适配问题。
+#!category=Intro
+
+[Script]
+Intro_Fix = type=http-response,pattern=^https?:\/\/api\.introdb\.app\/segments,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js
+TIDB_Fix = type=http-response,pattern=^https?:\/\/api\.theintrodb\.org\/v2\/media,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js
+
+[MITM]
+hostname = %APPEND% api.introdb.app, api.theintrodb.org

@@ -1,7 +1,6 @@
 #!name = IntroDB Auto Skip Segments
 #!desc = 自定义 IntroDB 中无数据剧集片头、片尾及前情提要时间戳，适用剧集片头、片尾固定时间。\n\n建议打开指定 IMDb 选项，目前Infuse 在首页加载列表时会自动请求 IntroDB 数据，服务器返回的数据或改写的数据都将本地储存30天，造成污染其他剧集数据。如已污染打开强制刷新选项或者删除infuse缓存；不保证可行性，仅供参考。\n\n 指定目标（ID, 剧名 @ 年份）填写示例：tt6953912, 权游 @ 2011，tt1234567\n\n 指定第几季（支持 1，2 或 1-5）填写示例：1, 2 或 1-5\n\n 开始时间、结束时间（s/mm:ss/HH:mm:ss）填写示例：05, 00:05, 01:00:35
 #!author = xSequip
-#!system = mac, ios
 #!icon = https://introdb.app/apple-touch-icon.png
 
 #!arguments <<-EOF

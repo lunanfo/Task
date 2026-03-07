@@ -1,0 +1,12 @@
+#!name=Intro Fix
+#!desc=Intro 增强脚本：IntroDB intro 为空但outro、recap不为空时，使用 TIDB，并修复 TIDB 适配问题。
+#!author=xSequip
+#!homepage=https://github.com/lunanfo/Task
+#!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/small-logo.png
+
+[Script]
+http-response ^https?:\/\/api\.introdb\.app\/segments script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js,requires-body=true,tag=Intro_Fix
+http-response ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_fix.js,requires-body=true,tag=TIDB_Fix
+
+[MITM]
+hostname = api.introdb.app, api.theintrodb.org
