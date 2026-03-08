@@ -1,6 +1,6 @@
 /**
  * @file intro_fix.js
- * @description Intro 增强脚本：触发 IntroDB 降级 TIDB，并修复 TIDB 适配问题。
+ * @description 增强脚本：IntroDB intro 为空但outro、recap不为空时，使用 TIDB，并修复 TIDB 适配问题。
  * 兼容 Surge, Loon, Quantumult X
  */
 
@@ -65,14 +65,14 @@ function main() {
                 return mod;
             };
 
-            if (fixSegments(obj.intro, "start_ms", "end_ms", 0, 9999)) modified = true;
-            if (fixSegments(obj.credits, "start_ms", "end_ms", 0, 9999)) modified = true;
+            if (fixSegments(obj.intro, "start_ms", null, 0, null)) modified = true;
+            if (fixSegments(obj.credits, null, "end_ms", null, 99999999)) modified = true;
 
             // Handle if the root is an array
             if (Array.isArray(obj)) {
                 obj.forEach(item => {
-                    if (fixSegments(item.intro, "start_ms", "end_ms", 0, 9999)) modified = true;
-                    if (fixSegments(item.credits, "start_ms", "end_ms", 0, 9999)) modified = true;
+                    if (fixSegments(item.intro, "start_ms", null, 0, null)) modified = true;
+                    if (fixSegments(item.credits, null, "end_ms", null, 99999999)) modified = true;
                 });
             }
         }
