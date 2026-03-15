@@ -1,0 +1,13 @@
+#!name=Intro Merge
+#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据，确保跳过片段完整性。
+#!category=Intro
+#!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/idb&tidb.png
+#!arguments = PRIORITY_MODE:"introdb"
+#!arguments-desc = PRIORITY_MODE: 数据合并优先级\n当同时按到两边数据时，决定优先覆盖哪一边的数据。填入 introdb (默认) 或 theintrodb。
+
+[Script]
+Intro_Merge = type=http-response,pattern=^https?:\/\/api\.introdb\.app\/segments,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=PRIORITY_MODE={{{PRIORITY_MODE}}}
+TIDB_Merge = type=http-response,pattern=^https?:\/\/api\.theintrodb\.org\/v2\/media,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=PRIORITY_MODE={{{PRIORITY_MODE}}}
+
+[MITM]
+hostname = %APPEND% api.introdb.app, api.theintrodb.org

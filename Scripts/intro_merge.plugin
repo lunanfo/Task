@@ -1,0 +1,15 @@
+#!name=Intro Merge
+#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据，确保跳过片段完整性。
+#!author=xSequip
+#!homepage=https://github.com/lunanfo/Task
+#!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/idb&tidb.png
+
+[Script]
+http-response ^https?:\/\/api\.introdb\.app\/segments script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,requires-body=true,tag=Intro_Merge,argument=introdb
+http-response ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,requires-body=true,tag=TIDB_Merge,argument=introdb
+
+[Argument]
+Intro_Merge_Priority = select, "IntroDB", "TheIntroDB", tag=数据合并优先级, desc="优先使用 IntroDB 或 TheIntroDB 的数据"
+
+[MITM]
+hostname = api.introdb.app, api.theintrodb.org
