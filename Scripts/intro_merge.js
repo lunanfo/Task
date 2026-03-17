@@ -141,6 +141,8 @@ function processEpisode(episode, cacheObj) {
     }
 
     // 2. 0/99999999 修正与格式规范 (TheIntroDB 风格：无内容则不返回该字段)
+    // 暂时注释掉处理null的代码，app已可以正常处理
+    /*
     const fields = ["intro", "credits", "recap", "preview"];
     fields.forEach(field => {
         if (episode[field]) {
@@ -155,6 +157,7 @@ function processEpisode(episode, cacheObj) {
             delete episode[field];
         }
     });
+    */
 
     return episode;
 }
