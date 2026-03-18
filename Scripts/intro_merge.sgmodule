@@ -1,13 +1,14 @@
 #!name=Intro Merge
-#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据，确保跳过片段完整性。
+#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据。\n💡 TheIntroDB API Key (默认关闭)：填入并【开启开关】后可提升 Limit (500)，同时可即时获取自己提交的未审核条目且自己条目权重 x10。
 #!category=Intro
 #!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/idb&tidb.png
-#!arguments = PRIORITY_MODE:"introdb"
-#!arguments-desc = PRIORITY_MODE: 数据合并优先级\n当同时按到两边数据时，决定优先覆盖哪一边的数据。填入 introdb (默认) 或 theintrodb。
+#!arguments = PRIORITY_MODE:"introdb", TIDB_API_KEY_ENABLED:"false", TIDB_API_KEY:""
+#!arguments-desc = PRIORITY_MODE: 请选择数据合并优先级。遇到两边都有数据时，决定优先覆盖哪一边的数据 (填入 introdb 或 theintrodb) \n TIDB_API_KEY_ENABLED: 拨动开关以启用 API Key 注入 (填入 true 或 false) \n TIDB_API_KEY: 请输入 TheIntroDB API 密钥。填入可将每日额度由 100 提升至 500，同时可即时获取自己提交的未审核条目且自己条目权重 x10。需配合上方开关开启使用。
 
 [Script]
-Intro_Merge = type=http-response,pattern=^https?:\/\/api\.introdb\.app\/segments,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=PRIORITY_MODE={{{PRIORITY_MODE}}}
-TIDB_Merge = type=http-response,pattern=^https?:\/\/api\.theintrodb\.org\/v2\/media,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=PRIORITY_MODE={{{PRIORITY_MODE}}}
+TIDB_Auth = type=http-request,pattern=^https?:\/\/api\.theintrodb\.org\/v2\/media,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=priority={{{PRIORITY_MODE}}},tidb_api_key_enabled={{{TIDB_API_KEY_ENABLED}}},tidb_api_key={{{TIDB_API_KEY}}}
+Intro_Merge = type=http-response,pattern=^https?:\/\/api\.introdb\.app\/segments,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=priority={{{PRIORITY_MODE}}},tidb_api_key_enabled={{{TIDB_API_KEY_ENABLED}}},tidb_api_key={{{TIDB_API_KEY}}}
+TIDB_Merge = type=http-response,pattern=^https?:\/\/api\.theintrodb\.org\/v2\/media,requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js,argument=priority={{{PRIORITY_MODE}}},tidb_api_key_enabled={{{TIDB_API_KEY_ENABLED}}},tidb_api_key={{{TIDB_API_KEY}}}
 
 [MITM]
 hostname = %APPEND% api.introdb.app, api.theintrodb.org

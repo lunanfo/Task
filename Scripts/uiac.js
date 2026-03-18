@@ -30,10 +30,17 @@ hostname = movie-api.infuse.im, api.themoviedb.org
 
 
 let url = $request.url;
-if (!url.includes("&include_adult=true")) {
-    url += "&include_adult=true";  // Add the parameter if it's not already present
+
+if (url.includes("include_adult=false")) {
+    // 若原带有 include_adult=false，直接予以纠正
+    url = url.replace("include_adult=false", "include_adult=true");
+} else if (!url.includes("include_adult=true")) {
+    // 防止末尾出现 '?&' 的丑陋组合。如果连 '?' 也没有，则补全 '?'
+    const separator = /[?&]$/.test(url) ? '' : (url.includes('?') ? '&' : '?');
+    url += separator + "include_adult=true";
 }
-$done({url: url});  // Return the modified URL
+
+$done({ url });
 
 
 //This script checks if &include_adult=true is already present in the request. If not, it appends it to the URL.

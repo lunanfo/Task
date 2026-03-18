@@ -1,10 +1,14 @@
 # Intro Merge for Quantumult X
 # Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据，确保跳过片段完整性。
 # 💡 QX 参数配置说明：
-# QX 模块不支持外部传参，该脚本默认优先使用 IntroDB (PRIORITY_MODE = 1)。
-# 若需修改优先级，请进入 intro_merge.js 脚本文件第 12 行手动修改变量值为 0 优先使用 TheIntroDB 数据。
+# QX 模块原生不支持外部传参，但脚本已适配 BoxJS。
+# 若需修改优先级或填入 API Key (提升限额、权重 x10 并即时获取个人提交)，请通过 BoxJS “请选择/请输入”对应选项（需开启对应的 API Key 开关）；
+# 也可以进入 intro_merge.js 脚本修改基础配置。
 
 [rewrite_local]
+# 注入 Auth Header
+^https?:\/\/api\.theintrodb\.org\/v2\/media url script-request-header https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js
+# 合并数据
 ^https?:\/\/api\.introdb\.app\/segments url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js
 ^https?:\/\/api\.theintrodb\.org\/v2\/media url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js
 
