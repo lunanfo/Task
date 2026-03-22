@@ -1,7 +1,8 @@
 /**
  * @file introdb_segments.js
  * @description IntroDB 增强脚本：解析请求并根据配置注入/修改跳过片段。
- * 💡 TheIntroDB API Key (默认关闭)：使用 IntroMerge 脚本填入 Key 并开启开关可提升 Limit，同时可即时获取自己提交的未审核条目且自己条目权重 x10。
+ * 💡 提示：本脚本默认仅对 Infuse App 生效，以减少对浏览器和其他软件及其性能的干扰。
+ * 💡 调试模式：开启后对所有 App 和浏览器访问全量生效，方便在浏览器中调试接口。
  */
 
 const $ = new Env("IntroDB_Segments");
@@ -28,7 +29,7 @@ const $ = new Env("IntroDB_Segments");
     } else if (argStr.includes(',')) {
       // B. Loon 位置列表模式: "true,false,true,imdbid,..."
       const list = argStr.split(',').map(s => s.trim());
-      const keys = ["Modify", "ForceUpdate", "Filter", "Target", "TargetSeason", "IntroOn", "IntroS", "IntroE", "RecapOn", "RecapS", "RecapE", "OutroOn", "OutroS", "OutroE"];
+      const keys = ["Modify", "ForceUpdate", "Filter", "Target", "TargetSeason", "IntroOn", "IntroS", "IntroE", "RecapOn", "RecapS", "RecapE", "OutroOn", "OutroS", "OutroE", "Debug"];
       keys.forEach((k, i) => { if (list[i] !== undefined) args[k] = list[i]; });
     } else {
       // C. 快捷模式: "最后生还者"
@@ -43,7 +44,7 @@ const $ = new Env("IntroDB_Segments");
 
   // 独立按键提取：适配拆分版的 BoxJS UI 组件（仅在没传入原生参数时生效）
   if (Object.keys(args).length === 0 && !argumentStr) {
-    const qxKeys = ["Modify", "ForceUpdate", "Filter", "Target", "TargetSeason", "IntroOn", "IntroS", "IntroE", "RecapOn", "RecapS", "RecapE", "OutroOn", "OutroS", "OutroE"];
+    const qxKeys = ["Modify", "ForceUpdate", "Filter", "Target", "TargetSeason", "IntroOn", "IntroS", "IntroE", "RecapOn", "RecapS", "RecapE", "OutroOn", "OutroS", "OutroE", "Debug"];
     qxKeys.forEach(k => {
       let val = $.getdata(`introdb_segments_${k}`);
       if (val !== undefined && val !== null && val !== '') {
@@ -66,8 +67,16 @@ const $ = new Env("IntroDB_Segments");
     recap_e: parseTime(args.RecapE),
     outro_on: (args.OutroOn == "true" || args.OutroOn === true),
     outro_s: parseTime(args.OutroS),
-    outro_e: parseTime(args.OutroE)
+    outro_e: parseTime(args.OutroE),
+    debug: (args.Debug == "true" || args.Debug === true)
   };
+
+  // UA 判定
+  const headers = $request.headers || {};
+  const ua = (headers['User-Agent'] || headers['user-agent'] || headers['User-agent'] || "").toLowerCase();
+  if (!config.debug && !ua.includes("infuse")) {
+    $done({}); return;
+  }
 
   if (!config.enabled) { $done({}); return; }
 

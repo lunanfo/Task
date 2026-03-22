@@ -1,8 +1,10 @@
-#!name=Emby Search Type Modifier
-#!desc=Emby Search Type Modifier
+#!name=Emby Search Modifier
+#!desc=修改 Emby 搜索参数，支持通过特殊符号指定搜索类型：\n@ 电影   $ 剧集   # 播放列表   ! 合集\n💡 提示：本脚本默认仅对 Infuse 生效。若需在其他 App 或浏览器调试，请开启“调试模式”。
+#!arguments = EMBY_SEARCH_DEBUG:"false"
+#!arguments-desc = EMBY_SEARCH_DEBUG: 开启调试模式 (填入 true 或 false)。开启后脚本将对所有应用生效。
 
 [Script]
-EmbySearchModifier = type=http-request, pattern=^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!], script-path=https://raw.githubusercontent.com/lunanfo/Task/master/Scripts/emby-search-modifier.js
+Emby_Search_Modifier = type=http-request,pattern=^https?:\/\/.*\/Items\?.*SearchTerm=[@$#!],script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/emby-search-modifier.js,argument=debug={{{EMBY_SEARCH_DEBUG}}}
 
 [MITM]
-hostname = %APPEND%
+hostname = %APPEND% 

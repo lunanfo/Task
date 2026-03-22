@@ -1,8 +1,8 @@
 /**
  * @file intro_merge.js
  * @description Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据。
- * 💡 TheIntroDB API Key (默认关闭)：填入并【开启开关】后可提升 Limit (500)，同时可即时获取自己提交的未审核条目且自己条目权重 x10。
- * 兼容 Surge, Loon, Quantumult X
+ * 💡 提示：本脚本默认仅对 Infuse App 生效，以减少对浏览器和其他软件及其性能的干扰。
+ * 💡 调试模式：开启后，脚本将对所有 App 和浏览器访问全量生效。
  */
 
 const $ = new Env("IntroDB_Merge");
@@ -15,42 +15,47 @@ const $ = new Env("IntroDB_Merge");
 let PRIORITY_MODE = 1; // 1: introdb 优先, 0: theintrodb 优先
 let TIDB_API_KEY = ""; // 存放 TheIntroDB API 密钥
 let TIDB_API_KEY_ENABLED = false; // TIDB 密钥总开关 (默认关闭)
+let DEBUG_MODE = false; // 调试模式：开启后对所有 App 生效
 
 // 1. 动态获取环境原生参数 (Loon、Surge 传入形式)
 let argumentStr = typeof $argument !== 'undefined' ? $argument : null;
 
 if (typeof argumentStr === 'string' && argumentStr.trim()) {
-    const argStr = argumentStr.trim();
-    if (argStr.includes('=')) {
-        // Surge / 键值对模式: priority=introdb, tidb_api_key=sk-...
-        argStr.split(/[&,]/).forEach(item => {
-            let [key, val] = item.split('=');
-            if (key) {
-                key = key.trim().toLowerCase();
-                val = val ? val.trim() : "";
-                if (key === 'priority' || key === 'intro_priority') {
-                    if (val === 'theintrodb') PRIORITY_MODE = 0;
-                    if (val === 'introdb') PRIORITY_MODE = 1;
-                }
-                if (key === 'tidb_api_key' || key === 'apikey' || key === 'api_key') {
-                    TIDB_API_KEY = val;
-                }
-                if (key === 'tidb_api_key_enabled' || key === 'apikey_enabled') {
-                    TIDB_API_KEY_ENABLED = (val === 'true' || val === '1' || val === '开启' || val === true);
-                }
-            }
-        });
-    } else if (argStr.includes(',')) {
-        // Loon / 顺序模式: theintrodb, sk-...
-        const list = argStr.split(',').map(s => s.trim());
-        if (list[0] && list[0].toLowerCase().includes("theintrodb")) PRIORITY_MODE = 0;
-        if (list[1]) TIDB_API_KEY = list[1];
-        if (list[2]) TIDB_API_KEY_ENABLED = (list[2].includes("true") || list[2] === "1" || list[2] === "开启");
-    } else {
-        // 极简兼容模式: 纯粹写了一个 theintrodb
-        const cleanArg = argStr.toLowerCase().replace(/\s+/g, '');
-        if (cleanArg.includes("theintrodb")) PRIORITY_MODE = 0;
-    }
+  const argStr = argumentStr.trim();
+  if (argStr.includes('=')) {
+    // Surge / 键值对模式: priority=introdb, tidb_api_key=sk-...
+    argStr.split(/[&,]/).forEach(item => {
+      let [key, val] = item.split('=');
+      if (key) {
+        key = key.trim().toLowerCase();
+        val = val ? val.trim() : "";
+        if (key === 'priority' || key === 'intro_priority') {
+          if (val === 'theintrodb') PRIORITY_MODE = 0;
+          if (val === 'introdb') PRIORITY_MODE = 1;
+        }
+        if (key === 'tidb_api_key' || key === 'apikey' || key === 'api_key') {
+          TIDB_API_KEY = val;
+        }
+        if (key === 'tidb_api_key_enabled' || key === 'apikey_enabled') {
+          TIDB_API_KEY_ENABLED = (val === 'true' || val === '1' || val === '开启' || val === true);
+        }
+        if (key === 'debug' || key === 'debug_mode' || key === 'all_apps') {
+          DEBUG_MODE = (val === 'true' || val === '1' || val === '开启' || val === true);
+        }
+      }
+    });
+  } else if (argStr.includes(',')) {
+    // Loon / 顺序模式: theintrodb, sk-...
+    const list = argStr.split(',').map(s => s.trim());
+    if (list[0] && list[0].toLowerCase().includes("theintrodb")) PRIORITY_MODE = 0;
+    if (list[1]) TIDB_API_KEY = list[1];
+    if (list[2]) TIDB_API_KEY_ENABLED = (list[2].includes("true") || list[2] === "1" || list[2] === "开启");
+    if (list[3]) DEBUG_MODE = (list[3].includes("true") || list[3] === "1" || list[3] === "开启");
+  } else {
+    // 极简兼容模式: 纯粹写了一个 theintrodb
+    const cleanArg = argStr.toLowerCase().replace(/\s+/g, '');
+    if (cleanArg.includes("theintrodb")) PRIORITY_MODE = 0;
+  }
 }
 
 // 2. 获取 BoxJS 兜底统一配置
@@ -60,16 +65,21 @@ let boxjsApiKeyEnabled = $.getdata('tidb_api_key_enabled');
 
 // 若无原生优先级，下放至 BoxJS 取值
 if (!argumentStr) {
-    if (boxjsPriority && boxjsPriority.toLowerCase().includes("theintrodb")) {
-        PRIORITY_MODE = 0;
-    }
-    if (boxjsApiKeyEnabled !== undefined && boxjsApiKeyEnabled !== null) {
-        TIDB_API_KEY_ENABLED = (boxjsApiKeyEnabled === "true" || boxjsApiKeyEnabled === true);
-    }
+  if (boxjsPriority && boxjsPriority.toLowerCase().includes("theintrodb")) {
+    PRIORITY_MODE = 0;
+  }
+  if (boxjsApiKeyEnabled !== undefined && boxjsApiKeyEnabled !== null) {
+    TIDB_API_KEY_ENABLED = (boxjsApiKeyEnabled === "true" || boxjsApiKeyEnabled === true);
+  }
 }
 // API 密钥如果未通过参数传入，下放 BoxJS 取值
 if (!TIDB_API_KEY && boxjsApiKey) {
-    TIDB_API_KEY = boxjsApiKey.trim();
+  TIDB_API_KEY = boxjsApiKey.trim();
+}
+// BoxJS 调试模式读取
+let boxjsDebug = $.getdata('intro_debug_mode');
+if (!argumentStr && boxjsDebug !== undefined && boxjsDebug !== null) {
+  DEBUG_MODE = (boxjsDebug === "true" || boxjsDebug === true);
 }
 // =========================================
 
@@ -79,12 +89,12 @@ const CACHE_KEY = "IntroDB_Cache";
  * 持久化存储工具 (基于 Env.js 实现统一储存)
  */
 const storage = {
-    read: (key) => $.getdata(key),
-    write: (val, key) => $.setdata(val, key)
+  read: (key) => $.getdata(key),
+  write: (val, key) => $.setdata(val, key)
 };
 
 function complete(obj) {
-    $.done(obj);
+  $.done(obj);
 }
 
 /* 暂时注释掉处理null的代码（应用已可处理）
@@ -119,18 +129,18 @@ function fixSegments(val, startField, endField, startValue, endValue) {
  * 确保返回值为数组格式 (适配 TheIntroDB 结构)
  */
 function ensureArray(val) {
-    if (val === null || val === undefined) return [];
-    if (Array.isArray(val)) return val;
-    return [val];
+  if (val === null || val === undefined) return [];
+  if (Array.isArray(val)) return val;
+  return [val];
 }
 
 /**
  * 从 URL 中提取参数 (适配 ID/季/集)
  */
 function getUrlParam(url, name) {
-    const reg = new RegExp(`[?&]${name}=([^&#]*)`, 'i');
-    const m = url.match(reg);
-    return m ? (isNaN(m[1]) ? m[1] : parseInt(m[1])) : null;
+  const reg = new RegExp(`[?&]${name}=([^&#]*)`, 'i');
+  const m = url.match(reg);
+  return m ? (isNaN(m[1]) ? m[1] : parseInt(m[1])) : null;
 }
 
 /**
@@ -138,181 +148,173 @@ function getUrlParam(url, name) {
  * 仅保留两者共有的核心字段，过滤掉 introdb 特有的 start_sec/updated_at 等
  */
 function mapSegmentItem(item) {
-    if (item && typeof item === 'object') {
-        let res = {
-            start_ms: item.start_ms,
-            end_ms: item.end_ms
-        };
-        if (item.confidence !== undefined) res.confidence = item.confidence;
-        if (item.submission_count !== undefined) res.submission_count = item.submission_count;
-        return res;
-    }
-    return null;
+  if (item && typeof item === 'object') {
+    let res = {
+      start_ms: item.start_ms,
+      end_ms: item.end_ms
+    };
+    if (item.confidence !== undefined) res.confidence = item.confidence;
+    if (item.submission_count !== undefined) res.submission_count = item.submission_count;
+    return res;
+  }
+  return null;
 }
 
 /**
  * 处理单个 Episode 对象 (遵循 TheIntroDB 格式规范)
  */
 function processEpisode(episode, cacheObj) {
-    // 1. 合并与映射逻辑：IntroDB 缓存优先，并映射 Outro -> Credits
-    if (cacheObj) {
-        // 判断逻辑：强制覆盖模式 OR 目标数据缺失
-        const shouldPatchIntro = (PRIORITY_MODE === 1) || (!episode.intro || episode.intro.length === 0);
-        const shouldPatchCredits = (PRIORITY_MODE === 1) || (!episode.credits || episode.credits.length === 0);
-        const shouldPatchRecap = (PRIORITY_MODE === 1) || (!episode.recap || episode.recap.length === 0);
+  // 1. 合并与映射逻辑：IntroDB 缓存优先，并映射 Outro -> Credits
+  if (cacheObj) {
+    // 判断逻辑：强制覆盖模式 OR 目标数据缺失
+    const shouldPatchIntro = (PRIORITY_MODE === 1) || (!episode.intro || episode.intro.length === 0);
+    const shouldPatchCredits = (PRIORITY_MODE === 1) || (!episode.credits || episode.credits.length === 0);
+    const shouldPatchRecap = (PRIORITY_MODE === 1) || (!episode.recap || episode.recap.length === 0);
 
-        if (shouldPatchIntro && cacheObj.intro) {
-            console.log(`[IntroDB Fix] Using IntroDB for INTRO (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
-            episode.intro = ensureArray(cacheObj.intro).map(mapSegmentItem).filter(Boolean);
-        }
-
-        if (shouldPatchCredits && cacheObj.outro) {
-            console.log(`[IntroDB Fix] Using IntroDB for CREDITS (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
-            episode.credits = ensureArray(cacheObj.outro).map(mapSegmentItem).filter(Boolean);
-        }
-
-        if (shouldPatchRecap && cacheObj.recap) {
-            console.log(`[IntroDB Fix] Using IntroDB for RECAP (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
-            episode.recap = ensureArray(cacheObj.recap).map(mapSegmentItem).filter(Boolean);
-        }
+    if (shouldPatchIntro && cacheObj.intro) {
+      console.log(`[IntroDB Fix] Using IntroDB for INTRO (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
+      episode.intro = ensureArray(cacheObj.intro).map(mapSegmentItem).filter(Boolean);
     }
 
-    // 2. 0/99999999 修正与格式规范 (TheIntroDB 风格：无内容则不返回该字段)
-    // 暂时注释掉处理null的代码，app已可以正常处理
-    /*
-    const fields = ["intro", "credits", "recap", "preview"];
-    fields.forEach(field => {
-        if (episode[field]) {
-            const arr = ensureArray(episode[field]).filter(item => item !== null);
-            if (arr.length > 0) {
-                fixSegments(arr, "start_ms", "end_ms", 0, 99999999);
-                episode[field] = arr;
-            } else {
-                delete episode[field];
-            }
-        } else {
-            delete episode[field];
-        }
-    });
-    */
+    if (shouldPatchCredits && cacheObj.outro) {
+      console.log(`[IntroDB Fix] Using IntroDB for CREDITS (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
+      episode.credits = ensureArray(cacheObj.outro).map(mapSegmentItem).filter(Boolean);
+    }
 
-    return episode;
+    if (shouldPatchRecap && cacheObj.recap) {
+      console.log(`[IntroDB Fix] Using IntroDB for RECAP (Mode: ${PRIORITY_MODE === 1 ? 'Override' : 'Patch'})`);
+      episode.recap = ensureArray(cacheObj.recap).map(mapSegmentItem).filter(Boolean);
+    }
+  }
+
+  // 2. 0/99999999 修正与格式规范 (TheIntroDB 风格：无内容则不返回该字段)
+  // 暂时注释掉处理null的代码，app已可以正常处理
+  /*
+  const fields = ["intro", "credits", "recap", "preview"];
+  fields.forEach(field => {
+      if (episode[field]) {
+          const arr = ensureArray(episode[field]).filter(item => item !== null);
+          if (arr.length > 0) {
+              fixSegments(arr, "start_ms", "end_ms", 0, 99999999);
+              episode[field] = arr;
+          } else {
+              delete episode[field];
+          }
+      } else {
+          delete episode[field];
+      }
+  });
+  */
+
+  return episode;
 }
 
 /**
  * 获取基于季集的动态缓存 Key (适配 Infuse 多集同时请求)
  */
 function getCacheKey(url) {
-    const s = url.match(/[?&]season=(\d+)/);
-    const e = url.match(/[?&]episode=(\d+)/);
-    if (s && e) return `${CACHE_KEY}_${s[1]}_${e[1]}`;
-    return CACHE_KEY;
+  const s = url.match(/[?&]season=(\d+)/);
+  const e = url.match(/[?&]episode=(\d+)/);
+  if (s && e) return `${CACHE_KEY}_${s[1]}_${e[1]}`;
+  return CACHE_KEY;
 }
 
 function main() {
-    const isRequest = typeof $request !== "undefined" && typeof $response === "undefined";
-    const url = $request.url;
+  const isRequest = typeof $request !== "undefined" && typeof $response === "undefined";
+  const url = $request.url;
+  const headers = $request.headers || {};
 
-    // --- Request 阶段处理 (拦截并注入 API Key HEADER) ---
-    if (isRequest) {
-        if (url.includes("api.theintrodb.org") && TIDB_API_KEY && TIDB_API_KEY_ENABLED) {
-            let headers = $request.headers || {};
-            headers["Authorization"] = `Bearer ${TIDB_API_KEY}`;
-            console.log(`[IntroDB Merge] 成功注入 TheIntroDB API Key.`);
-            return complete({ headers });
-        }
+  // 1. 三重 UA 安全提取与 Infuse 专属过滤
+  const userAgent = (headers['User-Agent'] || headers['user-agent'] || headers['User-agent'] || "").toLowerCase();
+
+  // 如果未开启调试模式，且不是 Infuse，则跳过
+  if (!DEBUG_MODE && !userAgent.includes("infuse")) {
+    return complete({});
+  }
+
+  // 2. 早期路径退出
+  const isTIDB = url.indexOf("api.theintrodb.org") !== -1;
+  const isIDB = url.indexOf("api.introdb.app") !== -1;
+  if (!isTIDB && !isIDB) return complete({});
+
+  // --- Request 阶段处理 (拦截并注入 API Key HEADER) ---
+  if (isRequest) {
+    if (isTIDB && url.indexOf("/v2/media") !== -1 && TIDB_API_KEY && TIDB_API_KEY_ENABLED) {
+      headers["Authorization"] = `Bearer ${TIDB_API_KEY}`;
+      console.log(`[Intro Merge] 已为 Infuse 注入 API Key.`);
+      return complete({ headers });
+    }
+    return complete({});
+  }
+
+  // --- Response 阶段处理 (返回并合并最终数据) ---
+  let body = $response.body;
+  let statusCode = $response.statusCode || 200;
+  const currentKey = getCacheKey(url);
+
+  try {
+    if (isIDB) {
+      if (!body) return complete({});
+      let obj = JSON.parse(body);
+
+      if (obj.intro !== null && obj.outro !== null) {
+        console.log("[Intro Merge] IntroDB 数据完整，直接放行.");
         return complete({});
-    }
+      }
 
-    // --- Response 阶段处理 (返回并合并最终数据) ---
+      console.log(`[Intro Merge] IntroDB 数据不全，缓存至 ${currentKey} 并触发 Failover.`);
+      storage.write(JSON.stringify({
+        intro: obj.intro,
+        outro: obj.outro,
+        recap: obj.recap
+      }), currentKey);
 
-    let body = $response.body;
-    let statusCode = $response.statusCode || 200;
-    const currentKey = getCacheKey(url);
+      obj.intro = obj.recap = obj.outro = null;
+      return complete({ body: JSON.stringify(obj) });
 
-    try {
-        if (url.includes("api.introdb.app")) {
-            if (!body) return complete({});
-            let obj = JSON.parse(body);
+    } else if (isTIDB) {
+      let cacheRaw = storage.read(currentKey);
+      let cacheObj = cacheRaw ? JSON.parse(cacheRaw) : null;
 
-            // Case A: 数据全，直接返回 (保持 IntroDB 格式)
-            if (obj.intro !== null && obj.outro !== null) {
-                console.log("[IntroDB Fix] IntroDB data is complete, passing through.");
-                return complete({});
-            }
+      if (cacheRaw) storage.write("", currentKey);
 
-            // Case B: 数据不全，缓存并置空触发 Failover
-            console.log(`[IntroDB Fix] IntroDB data incomplete, caching to ${currentKey}.`);
-            storage.write(JSON.stringify({
-                intro: obj.intro,
-                outro: obj.outro,
-                recap: obj.recap
-            }), currentKey);
+      if ((statusCode >= 400 || !body) && cacheObj) {
+        console.log(`[Intro Merge] TheIntroDB 异常 (Status: ${statusCode})，使用缓存 ${currentKey}.`);
+        statusCode = 200;
+        let obj = processEpisode({
+          "tmdb_id": getUrlParam(url, "tmdb_id"),
+          "season": getUrlParam(url, "season"),
+          "episode": getUrlParam(url, "episode"),
+          "type": "tv",
+          "recap": []
+        }, cacheObj);
+        return complete({ status: statusCode, body: JSON.stringify(obj) });
+      }
 
-            // 强制置空核心项 (引导 App)
-            obj.intro = null;
-            obj.recap = null;
-            obj.outro = null;
-            complete({ body: JSON.stringify(obj) });
-
-        } else if (url.includes("api.theintrodb.org")) {
-            let cacheRaw = storage.read(currentKey);
-            let cacheObj = cacheRaw ? JSON.parse(cacheRaw) : null;
-            let obj = null;
-
-            // 清理缓存
-            storage.write("", currentKey);
-
-            // Case D: Server Error (4xx/5xx) 或 空响应，且有缓存
-            const isErrorStatus = (statusCode >= 400);
-
-            if ((isErrorStatus || !body) && cacheObj) {
-                console.log(`[IntroDB Fix] TheIntroDB error (Status: ${statusCode}), using cache ${currentKey}.`);
-                statusCode = 200;
-                // 仿真 TheIntroDB 响应：提取 ID 和基础信息
-                obj = processEpisode({
-                    "tmdb_id": getUrlParam(url, "tmdb_id"),
-                    "season": getUrlParam(url, "season"),
-                    "episode": getUrlParam(url, "episode"),
-                    "type": "tv",
-                    "recap": []
-                }, cacheObj);
-            } else if (body) {
-                try {
-                    obj = JSON.parse(body);
-                    // 处理 Root 为数组或对象的情况
-                    if (Array.isArray(obj)) {
-                        obj.forEach(item => processEpisode(item, cacheObj));
-                    } else {
-                        processEpisode(obj, cacheObj);
-                    }
-                } catch (parseError) {
-                    // 如果 body 无法解析且有缓存，退而求其次使用缓存
-                    if (cacheObj) {
-                        console.log(`[IntroDB Fix] Invalid JSON from TheIntroDB, using cache ${currentKey}.`);
-                        obj = processEpisode({ intro: [], credits: [], recap: [] }, cacheObj);
-                        statusCode = 200;
-                    } else {
-                        console.log("[IntroDB Fix] Parse Error and no cache, passing through.");
-                        return complete({});
-                    }
-                }
-            } else {
-                return complete({});
-            }
-
-            complete({
-                status: statusCode,
-                body: JSON.stringify(obj)
-            });
-        } else {
-            // URL 不匹配，直接释放
-            complete({});
+      if (body) {
+        try {
+          let obj = JSON.parse(body);
+          if (Array.isArray(obj)) {
+            obj.forEach(item => processEpisode(item, cacheObj));
+          } else {
+            processEpisode(obj, cacheObj);
+          }
+          return complete({ status: statusCode, body: JSON.stringify(obj) });
+        } catch (parseError) {
+          if (cacheObj) {
+            console.log(`[Intro Merge] TIDB JSON 解析失败，使用缓存 ${currentKey}.`);
+            let obj = processEpisode({ intro: [], credits: [], recap: [] }, cacheObj);
+            return complete({ status: 200, body: JSON.stringify(obj) });
+          }
+          return complete({});
         }
-    } catch (e) {
-        console.log("[IntroDB Fix] Runtime Error: " + e);
-        complete({});
+      }
     }
+    complete({});
+  } catch (e) {
+    console.log("[Intro Merge] RuntimeError: " + e);
+    complete({});
+  }
 }
 
 main();
@@ -442,7 +444,7 @@ function Env(name, opts) {
       if (val) {
         try {
           json = JSON.parse(this.getdata(key))
-        } catch {}
+        } catch { }
       }
       return json
     }
@@ -663,7 +665,7 @@ function Env(name, opts) {
       }
     }
 
-    get(request, callback = () => {}) {
+    get(request, callback = () => { }) {
       if (request.headers) {
         delete request.headers['Content-Type']
         delete request.headers['Content-Length']
@@ -777,7 +779,7 @@ function Env(name, opts) {
       }
     }
 
-    post(request, callback = () => {}) {
+    post(request, callback = () => { }) {
       const method = request.method
         ? request.method.toLocaleLowerCase()
         : 'post'

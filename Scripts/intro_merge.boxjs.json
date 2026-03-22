@@ -8,7 +8,12 @@
     {
       "id": "IntroMerge",
       "name": "Intro Merge",
-      "keys": ["intro_priority", "tidb_api_key_enabled", "tidb_api_key"],
+      "keys": [
+        "intro_priority",
+        "tidb_api_key_enabled",
+        "tidb_api_key",
+        "intro_debug_mode"
+      ],
       "settings": [
         {
           "id": "intro_priority",
@@ -40,6 +45,13 @@
           "val": "",
           "type": "text",
           "desc": "填入可将每日额度由 100 提升至 500，同时可即时获取自己提交的未审核条目且自己条目权重 x10。需配合上方开关开启使用。"
+        },
+        {
+          "id": "intro_debug_mode",
+          "name": "调试模式",
+          "val": false,
+          "type": "boolean",
+          "desc": "开启后，脚本将对所有 App 和浏览器访问全量生效。关闭则仅对 Infuse 生效。"
         }
       ],
       "author": "@lunanfo",
@@ -66,23 +78,115 @@
         "introdb_segments_RecapE",
         "introdb_segments_OutroOn",
         "introdb_segments_OutroS",
-        "introdb_segments_OutroE"
+        "introdb_segments_OutroE",
+        "introdb_segments_Debug"
       ],
       "settings": [
-        { "id": "introdb_segments_Modify", "name": "启用修改 (Modify)", "val": true, "type": "boolean", "desc": "总开关：开启后脚本才对请求进行介入与修改。" },
-        { "id": "introdb_segments_ForceUpdate", "name": "强制刷新 (ForceUpdate)", "val": false, "type": "boolean", "desc": "强制忽略缓存请求最新数据（慎用/调试用）。" },
-        { "id": "introdb_segments_Filter", "name": "针对过滤 (Filter)", "val": true, "type": "boolean", "desc": "开启后，只针对你下方指定的剧集名称或 ID 生效。" },
-        { "id": "introdb_segments_Target", "name": "目标剧集 (Target)", "val": "", "type": "text", "desc": "支持：IMDb ID、剧名 或 剧名@年份 (如: tt1234567 或 最后生还者@2023 或 最后生还者)。逗号多开。" },
-        { "id": "introdb_segments_TargetSeason", "name": "指定剧集季数 (TargetSeason)", "val": "", "type": "text", "desc": "如指定只对某几季生效。支持格式: 1,2 或 1-3。" },
-        { "id": "introdb_segments_IntroOn", "name": "补全片头 (IntroOn)", "val": true, "type": "boolean", "desc": "开启后将强行填补片头跳过时间。" },
-        { "id": "introdb_segments_IntroS", "name": "片头开始时间 (IntroS)", "val": "", "type": "text", "desc": "格式支持纯秒数(如 90) 或 分:秒(如 1:30)。留空默认解析为 0。" },
-        { "id": "introdb_segments_IntroE", "name": "片头结束时间 (IntroE)", "val": "", "type": "text", "desc": "同上支持秒数或 分:秒(如 1:30)。请务必填写以闭合区间。" },
-        { "id": "introdb_segments_RecapOn", "name": "补全前情提要 (RecapOn)", "val": false, "type": "boolean", "desc": "开启后将强行填补 Recap（前情回顾）时间。" },
-        { "id": "introdb_segments_RecapS", "name": "前情开头时间 (RecapS)", "val": "", "type": "text", "desc": "通常前情提要直接从 0 开始。支持秒或分秒。留空默认为0。" },
-        { "id": "introdb_segments_RecapE", "name": "前情结束时间 (RecapE)", "val": "", "type": "text", "desc": "前情提要结束的时间点，如：30 或 0:30。" },
-        { "id": "introdb_segments_OutroOn", "name": "补全片尾 (OutroOn)", "val": false, "type": "boolean", "desc": "开启后将强行填补 Outro（片尾退场）跳过时间。" },
-        { "id": "introdb_segments_OutroS", "name": "片尾开始时间 (OutroS)", "val": "", "type": "text", "desc": "进入片尾卡司名单的准确时间点。支持秒或分秒。" },
-        { "id": "introdb_segments_OutroE", "name": "片尾结束时间 (OutroE)", "val": "", "type": "text", "desc": "不需要精细卡点的话直接填极大值 (如 9999)。" }
+        {
+          "id": "introdb_segments_Modify",
+          "name": "启用修改 (Modify)",
+          "val": true,
+          "type": "boolean",
+          "desc": "总开关：开启后脚本才对请求进行介入与修改。"
+        },
+        {
+          "id": "introdb_segments_ForceUpdate",
+          "name": "强制刷新 (ForceUpdate)",
+          "val": false,
+          "type": "boolean",
+          "desc": "强制忽略缓存请求最新数据（慎用/调试用）。"
+        },
+        {
+          "id": "introdb_segments_Filter",
+          "name": "针对过滤 (Filter)",
+          "val": true,
+          "type": "boolean",
+          "desc": "开启后，只针对你下方指定的剧集名称或 ID 生效。"
+        },
+        {
+          "id": "introdb_segments_Target",
+          "name": "目标剧集 (Target)",
+          "val": "",
+          "type": "text",
+          "desc": "支持：IMDb ID、剧名 或 剧名@年份 (如: tt1234567 或 最后生还者@2023 或 最后生还者)。逗号多开。"
+        },
+        {
+          "id": "introdb_segments_TargetSeason",
+          "name": "指定剧集季数 (TargetSeason)",
+          "val": "",
+          "type": "text",
+          "desc": "如指定只对某几季生效。支持格式: 1,2 或 1-3。"
+        },
+        {
+          "id": "introdb_segments_IntroOn",
+          "name": "补全片头 (IntroOn)",
+          "val": true,
+          "type": "boolean",
+          "desc": "开启后将强行填补片头跳过时间。"
+        },
+        {
+          "id": "introdb_segments_IntroS",
+          "name": "片头开始时间 (IntroS)",
+          "val": "",
+          "type": "text",
+          "desc": "格式支持纯秒数(如 90) 或 分:秒(如 1:30)。留空默认解析为 0。"
+        },
+        {
+          "id": "introdb_segments_IntroE",
+          "name": "片头结束时间 (IntroE)",
+          "val": "",
+          "type": "text",
+          "desc": "同上支持秒数或 分:秒(如 1:30)。请务必填写以闭合区间。"
+        },
+        {
+          "id": "introdb_segments_RecapOn",
+          "name": "补全前情提要 (RecapOn)",
+          "val": false,
+          "type": "boolean",
+          "desc": "开启后将强行填补 Recap（前情回顾）时间。"
+        },
+        {
+          "id": "introdb_segments_RecapS",
+          "name": "前情开头时间 (RecapS)",
+          "val": "",
+          "type": "text",
+          "desc": "通常前情提要直接从 0 开始。支持秒或分秒。留空默认为0。"
+        },
+        {
+          "id": "introdb_segments_RecapE",
+          "name": "前情结束时间 (RecapE)",
+          "val": "",
+          "type": "text",
+          "desc": "前情提要结束的时间点，如：30 或 0:30。"
+        },
+        {
+          "id": "introdb_segments_OutroOn",
+          "name": "补全片尾 (OutroOn)",
+          "val": false,
+          "type": "boolean",
+          "desc": "开启后将强行填补 Outro（片尾退场）跳过时间。"
+        },
+        {
+          "id": "introdb_segments_OutroS",
+          "name": "片尾开始时间 (OutroS)",
+          "val": "",
+          "type": "text",
+          "desc": "进入片尾卡司名单的准确时间点。支持秒或分秒。"
+        },
+        {
+          "id": "introdb_segments_OutroE",
+          "name": "片尾结束时间 (OutroE)",
+          "val": "",
+          "type": "text",
+          "desc": "不需要精细卡点的话直接填极大值 (如 9999)。"
+        },
+        {
+          "id": "introdb_segments_Debug",
+          "name": "调试模式 (Debug)",
+          "val": false,
+          "type": "boolean",
+          "desc": "开启后，脚本将对所有 App 和浏览器访问全量生效。关闭则仅对 Infuse 生效。"
+        }
       ],
       "author": "@lunanfo",
       "repo": "https://github.com/lunanfo/Task/tree/main/Scripts",

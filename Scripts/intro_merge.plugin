@@ -1,19 +1,20 @@
 #!name=Intro Merge
-#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据。\n💡 TheIntroDB API Key (默认关闭)：填入并【开启开关】后可提升 Limit (500)，同时可即时获取自己提交的未审核条目且自己条目权重 x10。
+#!desc=Intro 增强脚本：合并 IntroDB 与 TheIntroDB 数据。\n💡 提示：本脚本默认仅对 Infuse 生效。若需在其他 App 或浏览器调试，请开启“调试模式”。\n\nTheIntroDB API Key (默认关闭)：填入并【开启开关】后可提升 Limit (500)，同时可即时获取自己提交的未审核条目且自己条目权重 x10。
 #!author=xSequip
 #!homepage=https://github.com/lunanfo/Task
 #!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/idb&tidb.png
 
 [Script]
 # 同时拦截请求（注入 API Key）和响应（合并数据）
-http-request ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, tag=TIDB_Auth, argument={Intro_Merge_Priority},{TIDB_API_Key}
-http-response ^https?:\/\/api\.introdb\.app\/segments script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, requires-body=true, tag=Intro_Merge, argument={Intro_Merge_Priority},{TIDB_API_Key}
-http-response ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, requires-body=true, tag=TIDB_Merge, argument={Intro_Merge_Priority},{TIDB_API_Key}
+http-request ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, tag=TIDB_Auth, argument={Intro_Merge_Priority},{TIDB_API_Key},{TIDB_API_Key_Enabled},{Intro_Debug_Mode}
+http-response ^https?:\/\/api\.introdb\.app\/segments script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, requires-body=true, tag=Intro_Merge, argument={Intro_Merge_Priority},{TIDB_API_Key},{TIDB_API_Key_Enabled},{Intro_Debug_Mode}
+http-response ^https?:\/\/api\.theintrodb\.org\/v2\/media script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/intro_merge.js, requires-body=true, tag=TIDB_Merge, argument={Intro_Merge_Priority},{TIDB_API_Key},{TIDB_API_Key_Enabled},{Intro_Debug_Mode}
 
 [Argument]
 Intro_Merge_Priority = select, "IntroDB", "TheIntroDB", tag=请选择数据合并优先级, desc="遇到两边都有数据时，决定优先覆盖哪一边的数据。"
 TIDB_API_Key_Enabled = switch, false, tag=启用 TheIntroDB API Key, desc="便捷开关：若无需使用特权或排除报错，可在此快速关闭。"
 TIDB_API_Key = input, "", tag=请输入 TheIntroDB API Key, desc="填入可将每日额度由 100 提升至 500，同时可即时获取自己提交的未审核条目且自己条目权重 x10。需配合上方开关开启使用。"
+Intro_Debug_Mode = switch, false, tag=调试模式, desc="开启后，脚本将对所有 App 和浏览器访问全量生效。关闭则仅对 Infuse 生效。"
 
 [MITM]
 hostname = api.introdb.app, api.theintrodb.org
