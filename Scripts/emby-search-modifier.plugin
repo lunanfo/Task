@@ -1,3 +1,4 @@
+#!name=Emby Search Type Modifier
 #!desc=修改 Emby 搜索参数，支持通过特殊符号指定搜索类型：\n@ 电影   $ 剧集   # 播放列表   ! 合集\n💡 提示：本脚本默认仅对 Infuse 生效。若需在其他 App 或浏览器调试，请开启“调试模式”。
 #!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Infuse.png 
 
