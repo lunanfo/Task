@@ -5,7 +5,7 @@
 #!date = 2026-02-19
 
 [Argument]
-Modify = switch, true, tag = 启用
+Modify = switch, false, tag = 启用
 ForceUpdate = switch, false, tag = 强制刷新（跳过缓存）
 Filter = switch, true, tag = 指定 IMDb
 Target = input, "", tag = 指定目标（IMDb ID，剧名 @ 年份）

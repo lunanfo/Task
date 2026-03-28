@@ -28,7 +28,7 @@
             },
             {
               "key": "theintrodb",
-              "label": "TheIntroDB 优先 (仅缺漏时补充)"
+              "label": "TheIntroDB 优先"
             }
           ]
         },
@@ -85,7 +85,7 @@
         {
           "id": "introdb_segments_Modify",
           "name": "启用修改 (Modify)",
-          "val": true,
+          "val": false,
           "type": "boolean",
           "desc": "总开关：开启后脚本才对请求进行介入与修改。"
         },

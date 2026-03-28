@@ -9,7 +9,7 @@ const $ = new Env("IntroDB_Merge");
 
 // ================= 配置区 =================
 /**  数据优先级策略：
-* 0: TheIntroDB 优先 (仅在缺失时补漏)
+* 0: TheIntroDB 优先
 * 1: IntroDB 优先 (强制覆盖 TheIntroDB 的数据)
 */
 let PRIORITY_MODE = 1; // 1: introdb 优先, 0: theintrodb 优先
@@ -126,15 +126,6 @@ function fixSegments(val, startField, endField, startValue, endValue) {
 */
 
 /**
- * 确保返回值为数组格式 (适配 TheIntroDB 结构)
- */
-function ensureArray(val) {
-  if (val === null || val === undefined) return [];
-  if (Array.isArray(val)) return val;
-  return [val];
-}
-
-/**
  * 从 URL 中提取参数 (适配 ID/季/集)
  */
 function getUrlParam(url, name) {
@@ -144,29 +135,37 @@ function getUrlParam(url, name) {
 }
 
 /**
+ * 确保返回值为数组格式 (适配 TheIntroDB 结构)
+ */
+function ensureArray(val) {
+  if (val === null || val === undefined) return [];
+  if (Array.isArray(val)) return val;
+  return [val];
+}
+
+/**
  * 转换 IntroDB 片段项为 TheIntroDB 格式项
- * 仅保留两者共有的核心字段，过滤掉 introdb 特有的 start_sec/updated_at 等
+ * 仅保留核心字段：start_ms, end_ms (新版 TIDB API 已弃用 confidence 等统计字段)
  */
 function mapSegmentItem(item) {
   if (item && typeof item === 'object') {
-    let res = {
+    return {
       start_ms: item.start_ms,
       end_ms: item.end_ms
     };
-    if (item.confidence !== undefined) res.confidence = item.confidence;
-    if (item.submission_count !== undefined) res.submission_count = item.submission_count;
-    return res;
   }
   return null;
 }
 
 /**
  * 处理单个 Episode 对象 (遵循 TheIntroDB 格式规范)
+ * 注：TIDB 支持每个类型 (如 credits) 对应多个片段数组，而 IDB 目前通常仅为单个片段。
+ * 本函数确保两者合并时，结果始终符合 TIDB 的多片段数组结构。
  */
 function processEpisode(episode, cacheObj) {
-  // 1. 合并与映射逻辑：IntroDB 缓存优先，并映射 Outro -> Credits
+  // 1. 合并与映射逻辑：根据优先级决定使用 TIDB 生成数据还是 IDB 缓存
   if (cacheObj) {
-    // 判断逻辑：强制覆盖模式 OR 目标数据缺失
+    // 判断逻辑：强制覆盖模式 (PRIORITY_MODE 1) OR 目标数据缺失 (TIDB 无数据)
     const shouldPatchIntro = (PRIORITY_MODE === 1) || (!episode.intro || episode.intro.length === 0);
     const shouldPatchCredits = (PRIORITY_MODE === 1) || (!episode.credits || episode.credits.length === 0);
     const shouldPatchRecap = (PRIORITY_MODE === 1) || (!episode.recap || episode.recap.length === 0);

@@ -4,7 +4,7 @@
 #!icon = https://introdb.app/apple-touch-icon.png
 
 #!arguments <<-EOF
-Modify: [true, boolean, {title: "启用", desc: "总开关"}]
+Modify: [false, boolean, {title: "启用", desc: "总开关"}]
 ForceUpdate: [false, boolean, {title: "强制刷新", desc: "跳过缓存"}]
 Filter: [true, boolean, {title: "指定 IMDb ", desc: "仅对特定剧集生效"}]
 Target: ["", string, {title: "指定目标 (IMDb ID 或剧名)", desc: "IMDb ID, 剧名 @ 年份, 剧名"}]
