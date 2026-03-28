@@ -126,6 +126,11 @@ function fixSegments(val, startField, endField, startValue, endValue) {
 */
 
 /**
+ * 延迟等待辅助函数
+ */
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
  * 从 URL 中提取参数 (适配 ID/季/集)
  */
 function getUrlParam(url, name) {
@@ -218,7 +223,7 @@ function getCacheKey(url) {
   return CACHE_KEY;
 }
 
-function main() {
+async function main() {
   const isRequest = typeof $request !== "undefined" && typeof $response === "undefined";
   const url = $request.url;
   const headers = $request.headers || {};
@@ -253,32 +258,66 @@ function main() {
 
   try {
     if (isIDB) {
-      if (!body) return complete({});
-      let obj = JSON.parse(body);
-
-      if (obj.intro !== null && obj.outro !== null) {
-        console.log("[Intro Merge] IntroDB 数据完整，直接放行.");
-        return complete({});
+      let idbCacheData = null;
+      if (body) {
+        try {
+          let obj = JSON.parse(body);
+          // 记录素材，准备 Yield 给 TIDB 处理
+          idbCacheData = {
+            intro: obj.intro,
+            outro: obj.outro,
+            recap: obj.recap
+          };
+          console.log(`[Intro Merge] IntroDB 素材已捕获，准备合并.`);
+        } catch (e) {
+          console.log(`[Intro Merge] IntroDB JSON 解析失败.`);
+        }
+      } else {
+        console.log(`[Intro Merge] IntroDB 响应体为空.`);
       }
 
-      console.log(`[Intro Merge] IntroDB 数据不全，缓存至 ${currentKey} 并触发 Failover.`);
+      // 无论是否有数据，都必须写入“已完成”标记，解除 TIDB 的等待
       storage.write(JSON.stringify({
-        intro: obj.intro,
-        outro: obj.outro,
-        recap: obj.recap
+        status: "finished",
+        data: idbCacheData
       }), currentKey);
 
-      obj.intro = obj.recap = obj.outro = null;
-      return complete({ body: JSON.stringify(obj) });
+      // 始终将字段置空，强制播放器回退到 TIDB 响应中获取合并后的数据
+      if (body) {
+        let obj = JSON.parse(body);
+        obj.intro = obj.recap = obj.outro = null;
+        return complete({ body: JSON.stringify(obj) });
+      }
+      return complete({});
 
     } else if (isTIDB) {
-      let cacheRaw = storage.read(currentKey);
-      let cacheObj = cacheRaw ? JSON.parse(cacheRaw) : null;
+      let cacheObj = null;
+      let maxWait = 2500; // 最大等待 2.5 秒
+      const interval = 150;
 
-      if (cacheRaw) storage.write("", currentKey);
+      // 轮询等待 IDB 的成果（或完成信号）
+      console.log(`[Intro Merge] TIDB 正在等待 IDB 信号...`);
+      while (maxWait > 0) {
+        let cacheRaw = storage.read(currentKey);
+        if (cacheRaw) {
+          try {
+            let parsed = JSON.parse(cacheRaw);
+            if (parsed.status === "finished") {
+              cacheObj = parsed.data;
+              console.log(`[Intro Merge] 已命中 IDB 信号，总计等待 ${2500 - maxWait}ms.`);
+              break;
+            }
+          } catch (e) { }
+        }
+        await sleep(interval);
+        maxWait -= interval;
+      }
+
+      // 消耗掉缓存信号，防止下次误读
+      storage.write("", currentKey);
 
       if ((statusCode >= 400 || !body) && cacheObj) {
-        console.log(`[Intro Merge] TheIntroDB 异常 (Status: ${statusCode})，使用缓存 ${currentKey}.`);
+        console.log(`[Intro Merge] TheIntroDB 异常 (Status: ${statusCode})，使用 IDB 兜底.`);
         statusCode = 200;
         let obj = processEpisode({
           "tmdb_id": getUrlParam(url, "tmdb_id"),
@@ -301,7 +340,7 @@ function main() {
           return complete({ status: statusCode, body: JSON.stringify(obj) });
         } catch (parseError) {
           if (cacheObj) {
-            console.log(`[Intro Merge] TIDB JSON 解析失败，使用缓存 ${currentKey}.`);
+            console.log(`[Intro Merge] TIDB JSON 解析失败，使用 IDB 强制合并.`);
             let obj = processEpisode({ intro: [], credits: [], recap: [] }, cacheObj);
             return complete({ status: 200, body: JSON.stringify(obj) });
           }
@@ -316,7 +355,12 @@ function main() {
   }
 }
 
-main();
+(async () => {
+  await main();
+})().catch(e => {
+  console.log("[Intro Merge] TopLevel Error: " + e);
+  $.done({});
+});
 
 
 function Env(name, opts) {
