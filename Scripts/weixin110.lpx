@@ -1,0 +1,15 @@
+#!name = 微信拦截跳转
+#!desc = 微信拦截页自动提取链接并通知跳转
+#!author = lunanfo
+#!homepage = https://github.com/lunanfo/Task
+#!icon = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/WeChat.png
+#!system = iOS,iPadOS,macOS
+#!loon_version >= 3.5.1(978)
+#!tag = 微信,跳转,工具
+#!type = normal
+
+[Script]
+response if ${url} ~= /^https?:\/\/weixin110\.qq\.com\/cgi-bin\/mmspamsupport-bin\/newredirectconfirmcgi/i then script("https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/weixin110.js") with tag="微信解封跳转", requires_body=true
+
+[MITM]
+hostname = weixin110.qq.com

@@ -1,0 +1,9 @@
+#!name=微信拦截跳转
+#!desc=微信拦截页自动提取链接并通知跳转
+#!author=lunanfo
+
+[Script]
+微信跳转 = type=http-response,pattern=^https?:\/\/weixin110\.qq\.com\/cgi-bin\/mmspamsupport-bin\/newredirectconfirmcgi,requires-body=true,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/weixin110.js
+
+[MITM]
+hostname = %APPEND% weixin110.qq.com
