@@ -1,0 +1,9 @@
+# Trakt Watched Counts
+# 仅对 Infuse 生效
+
+[rewrite_local]
+^https:\/\/apiz?\.trakt\.tv\/users\/settings(\?|$) url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/trakt_watched_counts.js
+^https:\/\/apiz?\.trakt\.tv\/users\/(me|[^\/]+)\/stats(\?|$) url script-response-body https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/trakt_watched_counts.js
+
+[mitm]
+hostname = api.trakt.tv, apiz.trakt.tv

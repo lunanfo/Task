@@ -1,0 +1,11 @@
+#!name=Trakt Watched Counts
+#!desc=为非 VIP 账号恢复在 Infuse 中显示已看电影、剧集和电视节目的数量。\n💡 提示：本脚本仅对 Infuse 生效。
+#!category=Infuse
+#!icon=https://raw.githubusercontent.com/lunanfo/Task/main/icons/trakt.png
+
+[Script]
+Trakt_VIP = type=http-response,pattern=^https:\/\/apiz?\.trakt\.tv\/users\/settings(\?|$),requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/trakt_watched_counts.js
+Trakt_Stats = type=http-response,pattern=^https:\/\/apiz?\.trakt\.tv\/users\/(me|[^\/]+)\/stats(\?|$),requires-body=1,script-path=https://raw.githubusercontent.com/lunanfo/Task/main/Scripts/trakt_watched_counts.js
+
+[MITM]
+hostname = %APPEND% api.trakt.tv, apiz.trakt.tv
